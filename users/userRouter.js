@@ -88,7 +88,10 @@ router.delete('/:id', validateUserId, (req, res) => {
 /* ----- PUT /api/users/:id ----- */
 router.put('/:id', validateUserId, validateUser, (req, res) => {
   const { id } = req.user;
-  const updatedUser = { ...req.user, ...req.body };
+  const updatedUser = {
+    ...req.user,
+    ...req.body
+  };
 
   userDb
     .update(id, updatedUser)

@@ -4,28 +4,63 @@ const postDb = require('../posts/postDb');
 
 const router = express.Router();
 
+/* ----- GET /api/posts ----- */
 router.get('/', (req, res) => {
-  // this endpoint is the same as the one in the userRouter
+  postDb
+    .get()
+    .then((posts) => {
+      res.status(200).json(posts);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: 'The posts information could not be retrieved'
+      });
+    });
 });
 
-/* ----- GET /api/users/:userId/posts/:postId ----- */
-router.get('/:postId', validatePostId, (req, res) => {
+/* ----- GET /api/posts/:id ----- */
+router.get('/:id', validatePostId, (req, res) => {
   res.status(200).json(req.post);
 });
 
-router.delete('/:id', (req, res) => {
-  // do your magic!
+/* ----- DELETE /api/posts/:id ----- */
+router.delete('/:id', validatePostId, (req, res) => {
+  postDb
+    .remove(req.post.id)
+    .then((recordCount) => {
+      res.status(200).json(req.post);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: 'The post could not be removed'
+      });
+    });
 });
 
-router.put('/:id', (req, res) => {
-  // do your magic!
+/* ----- PUT /api/posts/:id ----- */
+router.put('/:id', validatePostId, (req, res) => {
+  const { id } = req.post;
+  const updatedPost = {
+    ...req.post,
+    ...req.body
+  };
+
+  postDb
+    .update(id, updatedPost)
+    .then((recordCount) => {
+      res.status(200).json(updatedPost);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({
+        error: 'The post could not be updated'
+      });
+    });
 });
 
 // custom middleware
-
 function validatePostId(req, res, next) {
-  const id = req.params.postId;
-  console.log('id', id);
+  const { id } = req.params;
   postDb
     .getById(id)
     .then((post) => {
